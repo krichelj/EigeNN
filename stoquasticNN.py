@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-from IPython.display import clear_output
+# from IPython.display import clear_output
 import torch
 
 
@@ -64,7 +64,10 @@ class ComplexMLP:
             }
             self.layers.append(layer)
 
-    def batch_normalize(self, x, layer, training=True):
+        self.activations = []
+
+    @staticmethod
+    def batch_normalize(x, layer, training=True):
         if training:
             mean = torch.mean(x, dim=0)
             var = torch.var(x, dim=0, unbiased=False) + 1e-5
@@ -144,8 +147,8 @@ def plot_accuracy(accuracies, current_epoch):
     plt.ylabel('Accuracy (%)')
     plt.title(f'Model Accuracy vs Epoch (Current: {accuracies[-1]:.2f}%)')
     plt.grid(True)
-    plt.pause(0.1)
-    clear_output(wait=True)
+    # plt.pause(0.1)
+    # clear_output(wait=True)
     plt.show()
 
 
@@ -178,7 +181,6 @@ def main():
     train_H = np.array([np.concatenate([h.real.flatten(), h.imag.flatten()]) for h, _ in train_data])
     train_C = np.array([np.concatenate([c.real.flatten(), c.imag.flatten()]) for _, c in train_data])
     test_H = np.array([np.concatenate([h.real.flatten(), h.imag.flatten()]) for h, _ in test_data])
-    test_C = np.array([np.concatenate([c.real.flatten(), c.imag.flatten()]) for _, c in test_data])
 
     # Normalize data
     train_H_mean = train_H.mean(axis=0)
@@ -197,7 +199,6 @@ def main():
     plt.ion()
 
     test_H_orig = [h for h, _ in test_data]
-    test_C_orig = [c for _, c in test_data]
 
     print("\nTraining model...")
     batch_size = 32
@@ -211,7 +212,7 @@ def main():
             batch_H = train_H[start_idx:end_idx]
             batch_C = train_C[start_idx:end_idx]
 
-            output = model.forward(batch_H)
+            model.forward(batch_H)
             model.backward(batch_H, batch_C, learning_rate=0.0001)
 
         # Calculate accuracy
